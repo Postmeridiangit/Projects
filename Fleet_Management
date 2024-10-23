@@ -1,4 +1,4 @@
-CREATE DATABASE Fleet Management;
+CREATE DATABASE Fleet_Management;
 
 CREATE TABLE Vehicles(
 	LicensePlate VARCHAR (50) PRIMARY KEY,
