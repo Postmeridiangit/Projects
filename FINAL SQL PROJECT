@@ -1,0 +1,281 @@
+
+WITH FilteredEmployees AS (
+    SELECT 
+        EmployeeID, 
+        FirstName, 
+        LastName, 
+        Gender,
+        Salary, 
+        Commission,
+        (Salary + Commission) AS TotalCompensation
+    FROM 
+        Employees
+    WHERE 
+        Gender = 'Male'
+)
+SELECT 
+    EmployeeID, 
+    FirstName, 
+    LastName, 
+    Salary, 
+    Commission,
+    TotalCompensation
+FROM 
+    FilteredEmployees
+WHERE 
+    TotalCompensation >= 8000;
+
+
+-------------------------------------------------------------------------------------
+
+ SELECT
+	 EMPLOYEE_NUMBER, 
+	 FIRST_NAME, 
+	 LAST_NAME, 
+	 POSITION, 
+	 SALARY,
+	CASE
+		WHEN TITLE = 'Miss' THEN 'Female'
+		WHEN TITLE = 'Mrs' THEN 'Female'
+		WHEN TITLE = 'Mr' THEN 'Male'
+		WHEN TITLE = 'Dr' THEN 'Male'
+		ELSE 'Male'
+	END AS GENDER,
+    CASE 
+        WHEN MONTH(GETDATE()) > MONTH(BIRTH_DATE) OR MONTH(GETDATE()) = MONTH(BIRTH_DATE) 
+		AND DAY(GETDATE()) >= DAY(BIRTH_DATE) 
+		THEN DATEDIFF(year, BIRTH_DATE, GETDATE()) 
+        ELSE DATEDIFF(year, BIRTH_DATE, GETDATE()) - 1 
+    END AS AGE 
+FROM EMPLOYEES
+WHERE 
+	Salary + COMMISSION >= 8000
+ORDER BY 
+	POSITION DESC;
+
+
+
+-------------------------------------------------------------------------------
+SELECT 
+    EMPLOYEE_NUMBER,  
+    FIRST_NAME,  
+    LAST_NAME,  
+    POSITION,  
+    SALARY,
+    CASE
+        WHEN TITLE = 'Miss' THEN 'Female'
+        WHEN TITLE = 'Mrs' THEN 'Female'
+        WHEN TITLE = 'Mr' THEN 'Male'
+        WHEN TITLE = 'Dr' THEN 'Male'
+        ELSE 'Male'
+    END AS GENDER,    
+    CASE         
+        WHEN MONTH(GETDATE()) > MONTH(BIRTH_DATE) 
+            OR (MONTH(GETDATE()) = MONTH(BIRTH_DATE) AND DAY(GETDATE()) >= DAY(BIRTH_DATE)) 
+        THEN DATEDIFF(year, BIRTH_DATE, GETDATE())         
+        ELSE DATEDIFF(year, BIRTH_DATE, GETDATE()) - 1     
+    END AS AGE 
+FROM 
+    EMPLOYEES
+WHERE 
+    Salary + COMMISSION >= 8000
+ORDER BY 
+    POSITION DESC;
+
+-------------------------------------------------------------------------------
+
+SELECT * FROM CUSTOMERS
+WHERE 
+    Country = (SELECT Country FROM Suppliers WHERE SUPPLIER_NUMBER = 1)
+    AND City = (SELECT City FROM Suppliers WHERE SUPPLIER_NUMBER = 1)
+    AND POSTAL_CODE LIKE (SELECT POSTAL_CODE FROM Suppliers WHERE SUPPLIER_NUMBER = 1);
+
+
+----------------------------------------------------------------------------------
+WITH OrderTotals AS (
+    SELECT 
+        Orders.ORDER_NUMBER,
+        (UNIT_PRICE * QUANTITY) AS TotalAmount
+    FROM 
+        Orders
+    JOIN 
+        ORDER_DETAILS ON Orders.ORDER_NUMBER = ORDER_DETAILS.ORDER_NUMBER
+)
+SELECT 
+    ORDER_NUMBER,
+    CASE
+        WHEN TotalAmount BETWEEN 0 AND 2000 THEN '0%'
+        WHEN TotalAmount BETWEEN 2001 AND 10000 THEN '5%'
+        WHEN TotalAmount BETWEEN 10001 AND 40000 THEN '10%'
+        WHEN TotalAmount BETWEEN 40001 AND 80000 THEN '15%'
+        ELSE '20%'
+    END AS NewDiscountRate,
+    CASE
+        WHEN ORDER_NUMBER BETWEEN 10000 AND 10999 THEN 'Apply old discount rate'
+        ELSE 'Apply new discount rate'
+    END AS Discount_Rate_Application_Note
+FROM 
+    OrderTotals
+WHERE 
+    ORDER_NUMBER BETWEEN 10998 AND 11003;
+
+
+
+----------------------------------------------------------------------------------
+
+SELECT 
+    SUPPLIERS.SUPPLIER_NUMBER, 
+    SUPPLIERS.COMPANY, 
+    SUPPLIERS.ADDRESS, 
+    SUPPLIERS.PHONE 
+FROM 
+    SUPPLIERS
+INNER JOIN 
+    PRODUCTS ON SUPPLIERS.SUPPLIER_NUMBER = PRODUCTS.PRODUCT_REF
+INNER JOIN 
+    CATEGORIES ON PRODUCTS.CATEGORY_CODE = CATEGORIES.CATEGORY_CODE
+WHERE 
+    CATEGORIES.CATEGORY_NAME = 'Beverages';
+
+----------------------------------------------------------------------------------
+
+SELECT 
+    CUSTOMER_CODE 
+FROM 
+    CUSTOMERS
+WHERE 
+    CITY = 'Berlin'
+AND 
+    CUSTOMER_CODE IN (
+        SELECT 
+            CUSTOMER_CODE 
+        FROM 
+            ORDERS
+        GROUP BY 
+            CUSTOMER_CODE
+        HAVING 
+            COUNT(ORDER_NUMBER) <= 1
+    );
+
+
+----------------------------------------------------------------------------------
+
+WITH FilteredOrders AS (
+    SELECT 
+        Orders.ORDER_NUMBER,
+        Orders.CUSTOMER_CODE,
+        Orders.ORDER_DATE
+    FROM 
+        ORDERS
+    WHERE 
+        Orders.ORDER_DATE BETWEEN '1998-04-01' AND '1998-04-30'
+        AND DATEPART(WEEKDAY, Orders.ORDER_DATE) = 2 -- Monday is 2 in most SQL systems
+)
+SELECT 
+    Customers.CUSTOMER_CODE, 
+    Customers.Company, 
+    Customers.PHONE, 
+    COALESCE(SUM(Order_Details.Unit_Price * Order_Details.Quantity), 0) AS Total_Amount, 
+    Customers.Country
+FROM 
+    Customers
+LEFT JOIN 
+    FilteredOrders ON Customers.CUSTOMER_CODE = FilteredOrders.CUSTOMER_CODE
+LEFT JOIN 
+    Order_Details ON FilteredOrders.ORDER_NUMBER = Order_Details.ORDER_NUMBER
+WHERE 
+    Customers.Country = 'France'
+GROUP BY 
+    Customers.CUSTOMER_CODE, 
+    Customers.Company, 
+    Customers.PHONE, 
+    Customers.Country;
+----------------------------------------------------------------------------------
+WITH ProductCount AS (
+    SELECT COUNT(PRODUCT_REF) AS TotalProducts
+    FROM PRODUCTS
+)
+SELECT 
+    CUSTOMERS.CUSTOMER_CODE, 
+    CUSTOMERS.COMPANY, 
+    CUSTOMERS.PHONE
+FROM 
+    CUSTOMERS
+JOIN 
+    ORDERS ON CUSTOMERS.CUSTOMER_CODE = ORDERS.CUSTOMER_CODE
+JOIN 
+    ORDER_DETAILS ON ORDERS.ORDER_NUMBER = ORDER_DETAILS.ORDER_NUMBER
+JOIN 
+    PRODUCTS ON ORDER_DETAILS.PRODUCT_REF = PRODUCTS.PRODUCT_REF
+GROUP BY 
+    CUSTOMERS.CUSTOMER_CODE, CUSTOMERS.COMPANY, CUSTOMERS.PHONE
+HAVING 
+    COUNT(DISTINCT PRODUCTS.PRODUCT_REF) = (SELECT TotalProducts FROM ProductCount);
+
+----------------------------------------------------------------------------------
+SELECT 
+    CUSTOMER_CODE, 
+    Number_Of_Orders
+FROM 
+    (
+        SELECT 
+            CUSTOMERS.CUSTOMER_CODE, 
+            COUNT(ORDERS.ORDER_NUMBER) AS Number_Of_Orders
+        FROM 
+            CUSTOMERS
+        LEFT JOIN 
+            ORDERS ON CUSTOMERS.CUSTOMER_CODE = ORDERS.CUSTOMER_CODE
+        WHERE 
+            CUSTOMERS.COUNTRY = 'France'
+        GROUP BY 
+            CUSTOMERS.CUSTOMER_CODE
+    ) AS OrderCount;
+
+----------------------------------------------------------------------------------
+
+SELECT 
+    COUNT(CASE WHEN YEAR(ORDER_DATE) = 1996 THEN 1 END) AS Orders_In_1996,
+    COUNT(CASE WHEN YEAR(ORDER_DATE) = 1997 THEN 1 END) AS Orders_In_1997,
+    (COUNT(CASE WHEN YEAR(ORDER_DATE) = 1997 THEN 1 END) -
+    COUNT(CASE WHEN YEAR(ORDER_DATE) = 1996 THEN 1 END)) AS Difference
+FROM 
+    ORDERS;
+
+------------------------------------------------------------------------------------
+-- Set UNITS_IN_STOCK to NULL where UNAVAILABLE is -1
+UPDATE PRODUCTS  
+SET UNITS_IN_STOCK = NULL 
+WHERE UNAVAILABLE = -1;
+
+-- Set UNITS_ON_ORDER to NULL where UNITS_ON_ORDER is 0
+UPDATE PRODUCTS  
+SET UNITS_ON_ORDER = NULL 
+WHERE UNITS_ON_ORDER = 0;
+
+-- Change EMPLOYEE_NUMBER to 7 where it's currently 2
+UPDATE ORDERS 
+SET EMPLOYEE_NUMBER = 7 
+WHERE EMPLOYEE_NUMBER = 2;
+
+-- Change EMPLOYEE_NUMBER to 3 where it's currently 5
+UPDATE ORDERS  
+SET EMPLOYEE_NUMBER = 3 
+WHERE EMPLOYEE_NUMBER = 5;
+
+-- Change EMPLOYEE_NUMBER to 1 where it's currently 8
+UPDATE ORDERS 
+SET EMPLOYEE_NUMBER = 1 
+WHERE EMPLOYEE_NUMBER = 8;
+
+-- Update SUPPLIER_NUMBER to 1 for specific products in category 'BOISSONS'
+UPDATE PRODUCTS 
+SET SUPPLIER_NUMBER = 1 
+WHERE PRODUCT_REF IN (
+    SELECT PRODUCT_REF 
+    FROM PRODUCTS 
+    WHERE CATEGORY_CODE IN (
+        SELECT CATEGORY_CODE 
+        FROM CATEGORIES 
+        WHERE UPPER(CATEGORY_NAME) = 'BOISSONS'
+    )
+);
