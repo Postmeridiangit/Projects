@@ -1,0 +1,287 @@
+--THIS IS A CLASS PROJECT TESTING MY SQL RELATIOINSHIP DATABASE MANAGEMENT SKILL
+Wine Table: 
+
+Record 1 :  (1, 'Red', 2019, 13.5)
+Record 2 : (2, 'White', 2020, 12.0)
+Record 3 : (3, 'Rose', 2018, 11.5) 
+Record 4 : (4, 'Red', 2021, 14.0)
+Record 5 : (5, 'Sparkling', 2017, 10.5)
+Record 6 : (6, 'White', 2019, 12.5)
+Record 7 :(7, 'Red', 2022, 13.0)
+Record 8 :(8, 'Rose', 2020, 11.0)
+Record 9 :(9, 'Red', 2018, 12.0)
+Record 10 : (10, 'Sparkling', 2019, 10.0)
+Record 11 :(11, 'White', 2021, 11.5)
+Record 12 : (12, 'Red', 2022, 15.0)
+Producer Table: 
+
+    
+
+Record 1:  (1, 'John', 'Smith', 'Sousse')
+Record 2 : (2, 'Emma', 'Johnson', 'Tunis')
+Record 3 : (3, 'Michael', 'Williams', 'Sfax')
+Record 4 : (4, 'Emily', 'Brown', 'Sousse')
+Record 5:  (5, 'James', 'Jones', 'Sousse')
+Record 6 : (6, 'Sarah', 'Davis', 'Tunis')
+Record 7:  (7, 'David', 'Miller', 'Sfax')
+Record 8:  (8, 'Olivia', 'Wilson', 'Monastir')
+Record 9: (9, 'Daniel', 'Moore', 'Sousse')
+Record 10 : (10, 'Sophia', 'Taylor', 'Tunis')
+Record 11 :  (11, 'Matthew', 'Anderson', 'Sfax')
+Record 12 :  (12, 'Amelia', 'Thomas', 'Sousse');
+
+--THE TESTS
+--Convert the given entity-relationship diagram into a relational model.
+CREATE TABLE Wines (
+    WineID INT PRIMARY KEY,
+    Type VARCHAR(50),
+    Year INT,
+    AlcoholContent DECIMAL(4,2));
+
+INSERT INTO Wines (WineID, Type, Year, AlcoholContent) 
+VALUES
+	(1, 'Red', 2019, 13.5),
+	(2, 'White', 2020, 12.0),
+	(3, 'Rose', 2018, 11.5),
+	(4, 'Red', 2021, 14.0),
+	(5, 'Sparkling', 2017, 10.5),
+	(6, 'White', 2019, 12.5),
+	(7, 'Red', 2022, 13.0),
+	(8, 'Rose', 2020, 11.0),
+	(9, 'Red', 2018, 12.0),
+	(10, 'Sparkling', 2019, 10.0),
+	(11, 'White', 2021, 11.5),
+	(12, 'Red', 2022, 15.0);
+
+CREATE TABLE Producers (
+    ProducerID INT PRIMARY KEY,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    City VARCHAR(50));
+
+INSERT INTO Producers (ProducerID, FirstName, LastName, City) 
+VALUES
+	(1, 'John', 'Smith', 'Sousse'),
+	(2, 'Emma', 'Johnson', 'Tunis'),
+	(3, 'Michael', 'Williams', 'Sfax'),
+	(4, 'Emily', 'Brown', 'Sousse'),
+	(5, 'James', 'Jones', 'Sousse'),
+	(6, 'Sarah', 'Davis', 'Tunis'),
+	(7, 'David', 'Miller', 'Sfax'),
+	(8, 'Olivia', 'Wilson', 'Monastir'),
+	(9, 'Daniel', 'Moore', 'Sousse'),
+	(10, 'Sophia', 'Taylor', 'Tunis'),
+	(11, 'Matthew', 'Anderson', 'Sfax'),
+	(12, 'Amelia', 'Thomas', 'Sousse');
+
+
+
+--Implement the relational model using SQL.
+-- Create the Wines table
+CREATE TABLE Wines (
+    WineID INT PRIMARY KEY,
+    Type VARCHAR(50),
+    Year INT,
+    AlcoholContent DECIMAL(4,2)
+);
+
+-- Insert records into the Wines table
+INSERT INTO Wines (WineID, Type, Year, AlcoholContent) VALUES
+(1, 'Red', 2019, 13.5),
+(2, 'White', 2020, 12.0),
+(3, 'Rose', 2018, 11.5),
+(4, 'Red', 2021, 14.0),
+(5, 'Sparkling', 2017, 10.5),
+(6, 'White', 2019, 12.5),
+(7, 'Red', 2022, 13.0),
+(8, 'Rose', 2020, 11.0),
+(9, 'Red', 2018, 12.0),
+(10, 'Sparkling', 2019, 10.0),
+(11, 'White', 2021, 11.5),
+(12, 'Red', 2022, 15.0);
+
+-- Create the Producers table
+CREATE TABLE Producers (
+    ProducerID INT PRIMARY KEY,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    City VARCHAR(50)
+);
+
+-- Insert records into the Producers table
+INSERT INTO Producers (ProducerID, FirstName, LastName, City) VALUES
+(1, 'John', 'Smith', 'Sousse'),
+(2, 'Emma', 'Johnson', 'Tunis'),
+(3, 'Michael', 'Williams', 'Sfax'),
+(4, 'Emily', 'Brown', 'Sousse'),
+(5, 'James', 'Jones', 'Sousse'),
+(6, 'Sarah', 'Davis', 'Tunis'),
+(7, 'David', 'Miller', 'Sfax'),
+(8, 'Olivia', 'Wilson', 'Monastir'),
+(9, 'Daniel', 'Moore', 'Sousse'),
+(10, 'Sophia', 'Taylor', 'Tunis'),
+(11, 'Matthew', 'Anderson', 'Sfax'),
+(12, 'Amelia', 'Thomas', 'Sousse');
+
+-- Create the WineProducers table to link wines with their producers
+CREATE TABLE WineProducers (
+    WineID INT,
+    ProducerID INT,
+    FOREIGN KEY (WineID) REFERENCES Wines(WineID),
+    FOREIGN KEY (ProducerID) REFERENCES Producers(ProducerID)
+);
+
+-- Insert records into the WineProducers table
+INSERT INTO WineProducers (WineID, ProducerID) 
+VALUES
+	(1, 1),
+	(2, 2),
+	(3, 3),
+	(4, 4),
+	(5, 5),
+	(6, 6),
+	(7, 7),
+	(8, 8),
+	(9, 9),
+	(10, 10),
+	(11, 11),
+	(12, 12);
+
+--Insert data into the database tables.
+		--(12 rows affected)
+		--Completion time: 2024-10-31T12:20:49.1805441+01:00
+--Retrieve a list of all producers.
+	SELECT * FROM Producers;
+
+--Retrieve a sorted list of producers by name.
+	SELECT * FROM Producers
+	ORDER BY LastName, FirstName;
+
+--Retrieve a list of producers from Sousse.
+	SELECT * FROM Producers
+	WHERE City = 'Sousse';
+
+--Calculate the total quantity of wine produced with the wine number 12.
+SELECT 
+    Order_Number,
+    PRODUCT_REF,
+    QUANTITY,
+    (PRODUCT_REF * QUANTITY) AS ProductResult
+FROM 
+    Order_Details
+WHERE 
+    PRODUCT_REF = 12;
+
+--Calculate the quantity of wine produced for each category.
+SELECT 
+    w.Type AS WineType,
+    SUM(od.Quantity) AS TotalQuantity
+FROM 
+    Order_Details od
+JOIN 
+    Wines w ON od.PRODUCT_REF = w.WineID
+GROUP BY 
+    w.Type;
+
+--Find producers in the Sousse region who have harvested at least one wine in quantities greater than 300 liters. Display their names and first names, sorted alphabetically.
+SELECT * FROM 
+    Order_Details
+    Producers.FirstName, 
+    Producers.LastName
+FROM 
+    Producers
+JOIN 
+    WineProducers ON Producers.ProducerID = WineProducers.ProducerID
+JOIN 
+    Order_Details ON WineProducers.WineID = Order_Details.PRODUCT_REF
+WHERE 
+    Producers.City = 'Sousse' 
+    AND Order_Details.Quantity > 300
+GROUP BY 
+    Producers.FirstName, 
+    Producers.LastName
+ORDER BY 
+    Producers.LastName, 
+    Producers.FirstName;
+
+
+--List the wine numbers with a degree greater than 12, produced by producer number 24.
+SELECT 
+    Wines.WineID
+FROM 
+    Wines
+JOIN 
+    WineProducers ON Wines.WineID = WineProducers.WineID
+WHERE 
+    Wines.AlcoholContent > 12
+    AND WineProducers.ProducerID = 24;
+
+
+--Find the producer who has produced the highest quantity of wine.
+SELECT TOP 1 
+    Producers.FirstName, 
+    Producers.LastName,
+    SUM(Order_Details.Quantity) AS TotalQuantity
+FROM 
+    Producers
+JOIN 
+    WineProducers ON Producers.ProducerID = WineProducers.ProducerID
+JOIN 
+    Order_Details ON WineProducers.WineID = Order_Details.PRODUCT_REF
+GROUP BY 
+    Producers.FirstName, 
+    Producers.LastName
+ORDER BY 
+    TotalQuantity DESC;
+
+--Find the average degree of wine produced.
+SELECT 
+    AVG(AlcoholContent) AS AverageAlcoholContent
+FROM 
+    Wines;
+
+--Find the oldest wine in the database.
+SELECT TOP 1
+    WineID, 
+    Type, 
+    Year, 
+    AlcoholContent
+FROM 
+    Wines
+ORDER BY 
+    Year ASC;
+
+
+--Retrieve a list of producers along with the total quantity of wine they have produced.
+SELECT 
+    p.ProducerID,
+    p.FirstName, 
+    p.LastName,
+    SUM(od.Quantity) AS TotalQuantity
+FROM 
+    Producers p
+JOIN 
+    WineProducers wp ON p.ProducerID = wp.ProducerID
+JOIN 
+    Order_Details od ON wp.WineID = od.PRODUCT_REF
+GROUP BY 
+    p.ProducerID, p.FirstName, p.LastName;
+
+--Retrieve a list of wines along with their producer details.
+SELECT 
+    Wines.WineID,
+    Wines.Type,
+    Wines.Year,
+    Wines.AlcoholContent,
+    Producers.FirstName,
+    Producers.LastName,
+    Producers.City
+FROM 
+    Wines
+JOIN 
+    WineProducers ON Wines.WineID = WineProducers.WineID
+JOIN 
+    Producers ON WineProducers.ProducerID = Producers.ProducerID;
+
+
+--ALL QUERIES & TABLES RUN JUST FINE AND CAN BE LOADED INTO ANY DATABASE FOR A REVIEW, THANKS 
