@@ -1,0 +1,328 @@
+ --This Project is to test my knowledge in formulating SQL queries to retrieve relevant data using Data Query Language (DQL).
+ 
+Products Table:
+
+Record 1: (ProductID= 1, ProductName= "Widget A", ProductType= "Widget", Price= 10.00)
+Record 2: (ProductID= 2, ProductName= "Widget B", ProductType= "Widget", Price= 15.00)
+Record 3: (ProductID= 3, ProductName= "Gadget X", ProductType= "Gadget", Price= 20.00)
+Record 4: (ProductID= 4, ProductName= "Gadget Y", ProductType= "Gadget", Price= 25.00)
+Record 5: (ProductID= 5, ProductName= "Doohickey Z", ProductType= "Doohickey", Price= 30.00)
+Customers Table:
+
+Record 1: (CustomerID= 1, CustomerName= "John Smith", Email= "john@example.com", Phone= "123-456-7890")
+Record 2: (CustomerID= 2, CustomerName= "Jane Doe", Email= "jane.doe@example.com", Phone= "987-654-3210")
+Record 3: (CustomerID= 3, CustomerName= "Alice Brown", Email= "alice.brown@example.com", Phone= "456-789-0123")
+Orders Table:
+
+Record 1: (OrderID= 101, CustomerID= 1, OrderDate= "2024-05-01")
+Record 2: (OrderID= 102, CustomerID= 2, OrderDate= "2024-05-02")
+Record 3: (OrderID= 103, CustomerID= 3, OrderDate= "2024-05-01")
+OrderDetails Table:
+
+Record 1: (OrderDetailID= 1, OrderID= 101, ProductID= 1, Quantity= 2)
+Record 2: (OrderDetailID= 2, OrderID= 101, ProductID= 3, Quantity= 1)
+Record 3: (OrderDetailID= 3, OrderID= 102, ProductID= 2, Quantity= 3)
+Record 4: (OrderDetailID= 4, OrderID= 102, ProductID= 4, Quantity= 2)
+Record 5: (OrderDetailID= 5, OrderID= 103, ProductID= 5, Quantity= 1)
+ProductTypes Table:
+
+Record 1: (ProductTypeID= 1, ProductTypeName= "Widget")
+Record 2: (ProductTypeID= 2, ProductTypeName= "Gadget")
+Record 3: (ProductTypeID= 3, ProductTypeName= "Doohickey")
+
+--We need to first create the tables above before attempting the tasks
+
+CREATE DATABASE SQL_PROJECT_DQL;
+
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(50),
+    ProductType VARCHAR(50),
+    Price DECIMAL(10,2)
+);
+
+INSERT INTO Products (ProductID, ProductName, ProductType, Price) VALUES
+(1, 'Widget A', 'Widget', 10.00),
+(2, 'Widget B', 'Widget', 15.00),
+(3, 'Gadget X', 'Gadget', 20.00),
+(4, 'Gadget Y', 'Gadget', 25.00),
+(5, 'Doohickey Z', 'Doohickey', 30.00);
+
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(100),
+    Email VARCHAR(100),
+    Phone VARCHAR(20)
+);
+
+INSERT INTO Customers (CustomerID, CustomerName, Email, Phone) VALUES
+(1, 'John Smith', 'john@example.com', '123-456-7890'),
+(2, 'Jane Doe', 'jane.doe@example.com', '987-654-3210'),
+(3, 'Alice Brown', 'alice.brown@example.com', '456-789-0123');
+
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    CustomerID INT,
+    OrderDate DATE,
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+
+INSERT INTO Orders (OrderID, CustomerID, OrderDate) VALUES
+(101, 1, '2024-05-01'),
+(102, 2, '2024-05-02'),
+(103, 3, '2024-05-01');
+
+CREATE TABLE OrderDetails (
+    OrderDetailID INT PRIMARY KEY,
+    OrderID INT,
+    ProductID INT,
+    Quantity INT,
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+INSERT INTO OrderDetails (OrderDetailID, OrderID, ProductID, Quantity) VALUES
+(1, 101, 1, 2),
+(2, 101, 3, 1),
+(3, 102, 2, 3),
+(4, 102, 4, 2),
+(5, 103, 5, 1);
+
+CREATE TABLE ProductTypes (
+    ProductTypeID INT PRIMARY KEY,
+    ProductTypeName VARCHAR(50)
+);
+
+INSERT INTO ProductTypes (ProductTypeID, ProductTypeName) VALUES
+(1, 'Widget'),
+(2, 'Gadget'),
+(3, 'Doohickey');
+
+--TASKS
+--Retrieve all products.
+
+SELECT * FROM Products;
+
+--Retrieve all customers.
+
+SELECT * FROM Customers;
+
+--Retrieve all orders.
+
+SELECT * FROM Orders;
+
+--Retrieve all order details.
+
+SELECT * FROM OrderDetails;
+
+--Retrieve all product types.
+
+SELECT * FROM ProductTypes;
+
+--Retrieve the names of the products that have been ordered by at least one customer, along with the total quantity of each product ordered.
+
+SELECT p.ProductName, 
+    SUM(od.Quantity) AS TotalQuantity
+FROM 
+    Products p
+JOIN 
+    OrderDetails od ON p.ProductID = od.ProductID
+GROUP BY 
+    p.ProductName;
+
+--Retrieve the names of the customers who have placed an order on every day of the week, along with the total number of orders placed by each customer.
+WITH OrdersPerDay AS (
+    SELECT 
+        CustomerID, 
+        DATENAME(WEEKDAY, OrderDate) AS OrderDay
+    FROM 
+        Orders
+    GROUP BY 
+        CustomerID, OrderDate
+),
+CompleteWeekCustomers AS (
+    SELECT 
+        CustomerID
+    FROM 
+        OrdersPerDay
+    GROUP BY 
+        CustomerID
+    HAVING 
+        COUNT(DISTINCT OrderDay) = 7
+)
+SELECT 
+    c.CustomerName, 
+    COUNT(o.OrderID) AS TotalOrders
+FROM 
+    CompleteWeekCustomers cw
+JOIN 
+    Customers c ON cw.CustomerID = c.CustomerID
+JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+GROUP BY 
+    c.CustomerName, c.CustomerID
+ORDER BY 
+    TotalOrders DESC;
+	
+--Retrieve the names of the customers who have placed the most orders, along with the total number of orders placed by each customer.
+
+SELECT 
+    c.CustomerName, 
+    COUNT(o.OrderID) AS TotalOrders
+FROM 
+    Customers c
+JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+GROUP BY 
+    c.CustomerName
+ORDER BY 
+    TotalOrders DESC;
+
+--Retrieve the names of the products that have been ordered the most, along with the total quantity of each product ordered.
+SELECT 
+    p.ProductName, 
+    SUM(od.Quantity) AS TotalQuantity
+FROM 
+    Products p
+JOIN 
+    OrderDetails od ON p.ProductID = od.ProductID
+GROUP BY 
+    p.ProductName
+ORDER BY 
+    TotalQuantity DESC;
+
+--Retrieve the names of customers who have placed an order for at least one widget.
+
+SELECT DISTINCT 
+    c.CustomerName
+FROM 
+    Customers c
+JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+JOIN 
+    OrderDetails od ON o.OrderID = od.OrderID
+JOIN 
+    Products p ON od.ProductID = p.ProductID
+WHERE 
+    p.ProductType = 'Widget';
+
+--Retrieve the names of the customers who have placed an order for at least one widget and at least one gadget, along with the total cost of the widgets and gadgets ordered by each customer.
+
+SELECT 
+    c.CustomerName,
+    SUM(CASE WHEN p.ProductType IN ('Widget', 'Gadget') THEN (od.Quantity * p.Price) ELSE 0 END) AS TotalWidgetGadgetCost
+FROM 
+    Customers c
+JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+JOIN 
+    OrderDetails od ON o.OrderID = od.OrderID
+JOIN 
+    Products p ON od.ProductID = p.ProductID
+WHERE 
+    p.ProductType IN ('Widget', 'Gadget')
+GROUP BY 
+    c.CustomerName
+HAVING 
+    COUNT(DISTINCT CASE WHEN p.ProductType = 'Widget' THEN p.ProductID END) > 0
+    AND COUNT(DISTINCT CASE WHEN p.ProductType = 'Gadget' THEN p.ProductID END) > 0
+ORDER BY 
+    TotalWidgetGadgetCost DESC;
+
+--Retrieve the names of the customers who have placed an order for at least one gadget, along with the total cost of the gadgets ordered by each customer.
+SELECT 
+    c.CustomerName,
+    SUM(od.Quantity * p.Price) AS TotalGadgetCost
+FROM 
+    Customers c
+JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+JOIN 
+    OrderDetails od ON o.OrderID = od.OrderID
+JOIN 
+    Products p ON od.ProductID = p.ProductID
+WHERE 
+    p.ProductType = 'Gadget'
+GROUP BY 
+    c.CustomerName
+ORDER BY 
+    TotalGadgetCost DESC;
+
+--Retrieve the names of the customers who have placed an order for at least one doohickey, along with the total cost of the doohickeys ordered by each customer.
+
+SELECT 
+    c.CustomerName,
+    SUM(od.Quantity * p.Price) AS TotalDoohickeyCost
+FROM 
+    Customers c
+JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+JOIN 
+    OrderDetails od ON o.OrderID = od.OrderID
+JOIN 
+    Products p ON od.ProductID = p.ProductID
+WHERE 
+    p.ProductType = 'Doohickey'
+GROUP BY 
+    c.CustomerName
+ORDER BY 
+    TotalDoohickeyCost DESC;
+
+--Retrieve the names of the customers who have placed an order every day of the week, along with the total number of orders placed by each customer.
+
+WITH OrdersPerDay AS (
+    SELECT 
+        CustomerID, 
+        DATENAME(WEEKDAY, OrderDate) AS OrderDay
+    FROM 
+        Orders
+    GROUP BY 
+        CustomerID, OrderDate
+),
+CompleteWeekCustomers AS (
+    SELECT 
+        CustomerID
+    FROM 
+        OrdersPerDay
+    GROUP BY 
+        CustomerID
+    HAVING 
+        COUNT(DISTINCT OrderDay) = 7
+)
+SELECT 
+    c.CustomerName, 
+    COUNT(o.OrderID) AS TotalOrders
+FROM 
+    CompleteWeekCustomers cw
+JOIN 
+    Customers c ON cw.CustomerID = c.CustomerID
+JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+GROUP BY 
+    c.CustomerName, c.CustomerID
+ORDER BY 
+    TotalOrders DESC;
+
+--Retrieve the total number of widgets and gadgets ordered by each customer, along with the total cost of the orders.
+
+SELECT 
+    c.CustomerName,
+    SUM(CASE WHEN p.ProductType = 'Widget' THEN od.Quantity ELSE 0 END) AS TotalWidgets,
+    SUM(CASE WHEN p.ProductType = 'Gadget' THEN od.Quantity ELSE 0 END) AS TotalGadgets,
+    SUM(od.Quantity * p.Price) AS TotalCost
+FROM 
+    Customers c
+JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+JOIN 
+    OrderDetails od ON o.OrderID = od.OrderID
+JOIN 
+    Products p ON od.ProductID = p.ProductID
+WHERE 
+    p.ProductType IN ('Widget', 'Gadget')
+GROUP BY 
+    c.CustomerName
+ORDER BY 
+    TotalCost DESC;
+
+--ALL CODES ARE ACTIVE AND WORKING, CAN BE LOADED TO ANY DATABASE, THANKS
