@@ -1,0 +1,40 @@
+# Automatic Pizza Order Program
+
+print('Welcome to Python Pizza Deliveries')
+
+# Get user input
+size = input('Enter your desired size of pizza (L, M, S): ').upper()
+add_pepperoni = input('Do you want to add pepperoni? (Y/N): ').upper()
+extra_cheese = input('Do you want extra cheese? (Y/N): ').upper()
+
+# Initialize base price
+if size == "S":
+    base_price = 15
+elif size == "M":
+    base_price = 20
+elif size == "L":
+    base_price = 25
+else:
+    print("Invalid size. Please try again.")
+    exit()
+
+# Add pepperoni cost
+if add_pepperoni == "Y":
+    if size == "S":
+        pepperoni_cost = 2
+    else:
+        pepperoni_cost = 3
+else:
+    pepperoni_cost = 0
+
+# Add extra cheese cost
+if extra_cheese == "Y":
+    cheese_cost = 1
+else:
+    cheese_cost = 0
+
+# Calculate final bill
+final_bill = base_price + pepperoni_cost + cheese_cost
+
+# Display final bill
+print(f"Your final bill is: ${final_bill}")
