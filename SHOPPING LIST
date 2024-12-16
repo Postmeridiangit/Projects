@@ -1,0 +1,67 @@
+# This is for an assessment to Create a program that allows the user to manage their shopping list.
+
+# Define the shopping list
+shopping_list = []
+
+# Define the maximum number of items allowed in the list
+MAX_ITEMS = 10
+
+# Function to display the current shopping list
+def view_list():
+    if not shopping_list:
+        print("Your shopping list is empty.")
+    else:
+        print("Current shopping list:")
+        for item in shopping_list:
+            print(f"- {item}")
+
+# Function to add an item to the shopping list
+def add_item():
+    if len(shopping_list) >= MAX_ITEMS:
+        print("The shopping list is full. You can't add more items.")
+    else:
+        item = input("Enter the item to add: ")
+        shopping_list.append(item)
+        print(f"{item} has been added to your shopping list.")
+
+# Function to remove an item from the shopping list
+def remove_item():
+    item = input("Enter the item to remove: ")
+    if item in shopping_list:
+        shopping_list.remove(item)
+        print(f"{item} has been removed from your shopping list.")
+    else:
+        print(f"{item} is not in the shopping list.")
+
+# Main program loop
+while True:
+    print("\nMenu:")
+    print("1. Add item")
+    print("2. Remove item")
+    print("3. View list")
+    print("4. Exit")
+    choice = input("Choose an option: ")
+
+    if choice == '1':
+        add_item()
+    elif choice == '2':
+        remove_item()
+    elif choice == '3':
+        view_list()
+    elif choice == '4':
+        print("Goodbye!")
+        break
+    else:
+        print("Invalid choice. Please choose a valid option.")
+
+
+# Shopping Items
+shopping_dict = {
+    'fruits': ['apple', 'banana', 'orange', 'grape', 'mango'],
+    'vegetables': ['carrot', 'spinach', 'broccoli', 'pepper', 'tomato'],
+    'dairy': ['milk', 'cheese', 'yoghurt'],
+    'bakery': ['bread', 'croissant', 'bagel'],
+    'meat': ['chicken', 'beef', 'fish'],
+    'snacks': ['chips', 'chocolate', 'nuts']}
+
+print(shopping_dict)
