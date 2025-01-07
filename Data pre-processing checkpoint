@@ -1,0 +1,66 @@
+# Import necessary libraries
+import pandas as pd
+
+# Load the dataset
+file_path = r"C:\Users\LENOVO\Downloads\STEG_BILLING_HISTORY.csv"
+df = pd.read_csv(file_path)
+
+# Display the first ten lines and store the results in a variable called 'client_0_bills'
+client_0_bills = df.head(10)
+print("First 10 lines of the dataset:\n", client_0_bills)
+
+# Check the data type of the 'client_0_bills' variable
+print("\nData type of 'client_0_bills':", type(client_0_bills))
+
+# Display general information of the dataset
+print("\nGeneral information of the dataset:")
+df.info()
+
+# Answering the questions:
+# How many rows and columns do we have in this dataset?
+rows, columns = df.shape
+print("\nNumber of rows:", rows)
+print("Number of columns:", columns)
+
+# How many categorical features are present in the dataset?
+categorical_features = df.select_dtypes(include=['object']).columns
+print("\nCategorical features:", categorical_features)
+print("Number of categorical features:", len(categorical_features))
+
+# How much memory space does the dataset consume?
+memory_usage = df.memory_usage(deep=True).sum()
+print("\nMemory usage of the dataset (in bytes):", memory_usage)
+
+# Inspect the dataset for potential missing values
+missing_values = df.isnull().sum()
+print("\nMissing values in the dataset:\n", missing_values)
+
+# Handling missing values
+# For example, we'll fill missing values with the median for numerical features and mode for categorical features
+for column in df.columns:
+    if df[column].dtype == 'object':
+        df[column].fillna(df[column].mode()[0], inplace=True)
+    else:
+        df[column].fillna(df[column].median(), inplace=True)
+
+# Run a descriptive analysis on numeric features
+numeric_features = df.select_dtypes(include=['number'])
+descriptive_analysis = numeric_features.describe()
+print("\nDescriptive analysis on numeric features:\n", descriptive_analysis)
+
+# Select the bills records for the client with an id ='train_Client_0', using 2 methods
+client_0_records_method_1 = df[df['id'] == 'train_Client_0']
+client_0_records_method_2 = df.query("id == 'train_Client_0'")
+
+print("\nBills records for client with id='train_Client_0' (Method 1):\n", client_0_records_method_1)
+print("\nBills records for client with id='train_Client_0' (Method 2):\n", client_0_records_method_2)
+
+# Transform the 'counter_type' feature to a numeric variable using Label Encoding
+from sklearn.preprocessing import LabelEncoder
+label_encoder = LabelEncoder()
+df['counter_type_numeric'] = label_encoder.fit_transform(df['counter_type'])
+
+# Delete the 'counter_statue' feature from the DataFrame
+df.drop(columns=['counter_statue'], inplace=True)
+
+print("\nDataFrame after transformations:\n", df.head())
